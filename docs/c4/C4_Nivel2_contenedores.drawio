@@ -1,0 +1,51 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="HevFrjybFGUa4egsd9JA">
+    <mxGraphModel dx="2192" dy="1118" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="&lt;b&gt;Cliente&lt;/b&gt;" vertex="1">
+          <mxGeometry height="110" width="70" x="40" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="&lt;b&gt;Administrador&lt;/b&gt;" vertex="1">
+          <mxGeometry height="110" width="70" x="40" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" value="&lt;b&gt;Aplicación Web&lt;/b&gt;&lt;br&gt;Interfaz para clientes y administradores.&lt;br&gt;&lt;i&gt;Web UI&lt;/i&gt;" vertex="1">
+          <mxGeometry height="120" width="220" x="220" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" value="&lt;b&gt;API Backend&lt;/b&gt;&lt;br&gt;API REST para ventas, productos, inventario y usuarios.&lt;br&gt;&lt;i&gt;Spring Boot&lt;/i&gt;" vertex="1">
+          <mxGeometry height="160" width="260" x="570" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="&lt;b&gt;Redis Cache&lt;/b&gt;&lt;br&gt;Información consultada frecuentemente.&lt;br&gt;&lt;i&gt;Redis&lt;/i&gt;" vertex="1">
+          <mxGeometry height="110" width="210" x="560" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-6" parent="1" style="shape=cylinder;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" value="&lt;b&gt;Base de Datos Principal&lt;/b&gt;&lt;br&gt;Usuarios, productos, ventas, inventario y pagos.&lt;br&gt;&lt;i&gt;MySQL / PostgreSQL&lt;/i&gt;" vertex="1">
+          <mxGeometry height="150" width="230" x="910" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;" value="&lt;b&gt;Pasarela de Pagos&lt;/b&gt;&lt;br&gt;Servicio externo de procesamiento de pagos." vertex="1">
+          <mxGeometry height="120" width="230" x="850" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-8" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-9" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-3" value="Administra">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-10" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-4" value="HTTP / REST">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-11" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-6" value="Consulta / actualiza">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-12" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-5" value="Cache-Aside">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tf5A_NtWLAJkJM416VY4-13" edge="1" parent="1" source="Tf5A_NtWLAJkJM416VY4-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;" target="Tf5A_NtWLAJkJM416VY4-7" value="">
+          <mxGeometry relative="1" x="-0.0154" y="-20" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
