@@ -1,0 +1,483 @@
+openapi: 3.0.3
+info:
+  title: API RESTful del Módulo de Ventas
+  description: >-
+    Especificación OpenAPI 3.0 para el Módulo de Ventas.
+    Permite el procesamiento transaccional de cobros y la integración
+    intermodular con Recursos Humanos (comisiones) y Soporte Técnico (garantías).
+  version: 1.0.0
+servers:
+  - url: https://api.ventas.empresa.com/v1
+    description: Servidor Principal de Producción (HTTPS)
+  - url: https://sandbox.api.ventas.empresa.com/v1
+    description: Servidor de Pruebas (Sandbox)
+
+paths:
+  /auth/login:
+    post:
+      summary: Autenticación de usuarios y emisión de JWT
+      description: Permite autenticar usuarios o módulos consumidores para obtener un token JWT.
+      operationId: login
+      tags:
+        - Autenticación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa. Retorna el token JWT generado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Solicitud malformada o datos faltantes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Credenciales inválidas. Correo o contraseña erróneos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/process:
+    post:
+      summary: Procesamiento transaccional de pagos
+      description: Procesa el cobro financiero de una venta utilizando un token seguro de tarjeta.
+      operationId: processPayment
+      tags:
+        - Pagos
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Transacción de pago aprobada exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Datos del pago inválidos o token expirado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Token JWT no proporcionado o no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error en el procesamiento del pago en la pasarela o servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sales/rep/{vendedorId}:
+    get:
+      summary: Consulta de ventas por vendedor
+      description: Permite a Recursos Humanos obtener el historial de ventas de un vendedor para calcular comisiones.
+      operationId: getSalesByRep
+      tags:
+        - Ventas
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: vendedorId
+          in: path
+          required: true
+          description: Identificador único del vendedor.
+          schema:
+            type: string
+            example: VEND-1024
+        - name: startDate
+          in: query
+          required: false
+          description: Fecha inicial de filtrado (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2026-08-01'
+        - name: endDate
+          in: query
+          required: false
+          description: Fecha final de filtrado (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2026-08-31'
+      responses:
+        '200':
+          description: Historial de ventas recuperado exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesRepResponse'
+        '400':
+          description: Formato o rango de fechas inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Token JWT no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vendedor no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno en base de datos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sales/validate-warranty/{saleId}:
+    get:
+      summary: Validación de venta y vigencia de garantía
+      description: Permite a Soporte Técnico verificar si una venta existe y si su garantía está vigente.
+      operationId: validateWarranty
+      tags:
+        - Garantías
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: saleId
+          in: path
+          required: true
+          description: Identificador único de la transacción de venta.
+          schema:
+            type: string
+            example: SALE-99881
+      responses:
+        '200':
+          description: Validación de garantía realizada con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarrantyValidationResponse'
+        '401':
+          description: Token JWT no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Venta o factura no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sales/customer/{clienteId}:
+    get:
+      summary: Consulta de historial de compras por cliente
+      description: Obtiene el listado consolidado de compras asociadas a un cliente específico.
+      operationId: getCustomerSales
+      tags:
+        - Ventas
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          description: ID o documento de identificación del cliente.
+          schema:
+            type: string
+            example: CLI-55412
+      responses:
+        '200':
+          description: Historial de compras recuperado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSalesResponse'
+        '401':
+          description: Token JWT no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cliente no registrado o sin ventas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sales/summary:
+    get:
+      summary: Resumen consolidado de ventas por período
+      description: Proporciona a Recursos Humanos e Indicadores Gerenciales el resumen de ventas en un rango de tiempo.
+      operationId: getSalesSummary
+      tags:
+        - Reportes
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: Fecha de inicio (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2026-08-01'
+        - name: endDate
+          in: query
+          required: true
+          description: Fecha de fin (YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+            example: '2026-08-31'
+      responses:
+        '200':
+          description: Resumen general obtenido exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesSummaryResponse'
+        '400':
+          description: Rango de fechas no válido o ausente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error en el cálculo o consulta en base de datos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Encabezado HTTP Authorization utilizando el esquema Bearer con un token JWT.'
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: usuario@empresa.com
+        password:
+          type: string
+          format: password
+          example: Password123!
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          example: 3600
+
+    PaymentRequest:
+      type: object
+      required:
+        - amount
+        - currency
+        - cardToken
+      properties:
+        amount:
+          type: number
+          format: float
+          example: 150.50
+        currency:
+          type: string
+          example: USD
+        cardToken:
+          type: string
+          example: tok_visa_123456789
+
+    PaymentResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: tx_987654321
+        status:
+          type: string
+          example: APPROVED
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-08-05T21:55:00Z'
+
+    SalesRepResponse:
+      type: object
+      properties:
+        vendedorId:
+          type: string
+          example: VEND-1024
+        totalFacturado:
+          type: number
+          format: float
+          example: 24500.75
+        cantidadTransacciones:
+          type: integer
+          example: 18
+        ventas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItem'
+
+    SaleItem:
+      type: object
+      properties:
+        saleId:
+          type: string
+          example: SALE-99881
+        fecha:
+          type: string
+          format: date-time
+          example: '2026-08-10T14:30:00Z'
+        montoTotal:
+          type: number
+          format: float
+          example: 1250.00
+        estado:
+          type: string
+          example: COMPLETADA
+
+    WarrantyValidationResponse:
+      type: object
+      properties:
+        saleId:
+          type: string
+          example: SALE-99881
+        clienteId:
+          type: string
+          example: CLI-55412
+        producto:
+          type: string
+          example: Servidor Dell PowerEdge T340
+        fechaCompra:
+          type: string
+          format: date
+          example: '2026-01-15'
+        tieneGarantia:
+          type: boolean
+          example: true
+        diasRestantesGarantia:
+          type: integer
+          example: 127
+
+    CustomerSalesResponse:
+      type: object
+      properties:
+        clienteId:
+          type: string
+          example: CLI-55412
+        totalCompras:
+          type: integer
+          example: 5
+        montoAcumulado:
+          type: number
+          format: float
+          example: 8900.00
+        historial:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItem'
+
+    SalesSummaryResponse:
+      type: object
+      properties:
+        periodoInicio:
+          type: string
+          format: date
+          example: '2026-08-01'
+        periodoFin:
+          type: string
+          format: date
+          example: '2026-08-31'
+        totalFacturadoGeneral:
+          type: number
+          format: float
+          example: 158900.50
+        totalVentasRealizadas:
+          type: integer
+          example: 320
+        ticketPromedio:
+          type: number
+          format: float
+          example: 496.56
+        vendedoresActivos:
+          type: integer
+          example: 12
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: RESOURCE_NOT_FOUND
+        message:
+          type: string
+          example: El recurso solicitado no existe o no se encuentra disponible.
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-08-05T21:55:00Z'
